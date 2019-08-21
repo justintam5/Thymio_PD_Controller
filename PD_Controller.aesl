@@ -1,0 +1,47 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--list of constants-->
+
+
+<!--show keywords state-->
+<keywords flag="true"/>
+
+
+<!--node thymio-II-->
+<node nodeId="1" name="thymio-II">var set_distance = 2000
+var error
+var KP = 30 #Will be divided
+var KD = 5 #Will be divided
+var i = 0 #Holds the previous value recorded by the PROX sensor
+var channel = 0
+var delta_error #Holds the change in readings
+var speed = 150
+
+motor.right.target = speed
+onevent prox
+	if prox.horizontal[channel] == 0 then
+		motor.left.target = speed
+	end
+	if prox.horizontal[channel] != 0 then
+		error = prox.horizontal[channel] - set_distance
+		if  i != 0 then
+			delta_error = error - i 
+			motor.left.target = speed + delta_error/KD + error/KP
+			i = 0
+		end
+		if i == 0 then
+			i = error
+		end
+	end 
+
+#ERRORS:
+#No floats, only integers are recorded. For example, 'motor.right.target = 3/2' will set the value to 1. and 1/2 will set the value to 0.
+#16-sign-bit-repersentation--> No number larger than 32768 is feasible(not just in output, but in ANY moment of an operation, the larger number will switch it to negative, obviously since that 16th bit is used for the sign! ) For example, max 16-bit in HEXADECIMAL is '0FFF, but once you hit '1000' than it becomes -'0FFF'. (2's compliment is taken)</node>
+
+
+</network>
